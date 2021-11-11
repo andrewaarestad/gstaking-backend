@@ -1,5 +1,8 @@
-const SushiToken = artifacts.require('SushiToken.sol')
-const MasterChef = artifacts.require('MasterChef.sol')
+const SushiToken = artifacts.require('SushiToken')
+const MasterChef = artifacts.require('MasterChef')
+const GaussFarm = artifacts.require('GaussFarm')
+const LootFarm = artifacts.require('LootFarm')
+const NFarm = artifacts.require('NFarm')
 
 module.exports = async function(deployer) {
   // Deploy Sushi Token
@@ -19,6 +22,18 @@ module.exports = async function(deployer) {
   // Make Masterchef contract token owner
   const masterChef = await MasterChef.deployed()
   await sushiToken.transferOwnership(masterChef.address)
+
+    // Deploy GaussFarm
+    await deployer.deploy(GaussFarm)
+    const gaussFarm = await GaussFarm.deployed()
+  
+    // Deploy LootFarm
+    await deployer.deploy(LootFarm)
+    const lootFarm = await LootFarm.deployed()
+  
+    // Deploy NFarm
+    await deployer.deploy(NFarm)
+    const nFarm = await NFarm.deployed()
 
   // Add Liquidity pool for rewards, e.g., "ETH/DAI Pool"
   await masterChef.add(

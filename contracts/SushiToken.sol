@@ -1,4 +1,7 @@
-pragma solidity 0.6.12;
+// SPDX-License-Identifier: MIT
+
+// pragma solidity >=0.8.0 <0.9.0;
+pragma solidity >=0.6.0 <0.9.0;
 
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -6,7 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 
 // SushiToken with Governance.
-contract SushiToken is ERC20("Gaussian Protocol", "RNG"), Ownable {
+contract SushiToken is ERC20("The Gaussian Protocol", "RNG"), Ownable {
     /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
     function mint(address _to, uint256 _amount) public onlyOwner {
         _mint(_to, _amount);
@@ -117,7 +120,7 @@ contract SushiToken is ERC20("Gaussian Protocol", "RNG"), Ownable {
         address signatory = ecrecover(digest, v, r, s);
         require(signatory != address(0), "SUSHI::delegateBySig: invalid signature");
         require(nonce == nonces[signatory]++, "SUSHI::delegateBySig: invalid nonce");
-        require(now <= expiry, "SUSHI::delegateBySig: signature expired");
+        require(block.timestamp <= expiry, "SUSHI::delegateBySig: signature expired");
         return _delegate(signatory, delegatee);
     }
 
@@ -198,7 +201,7 @@ contract SushiToken is ERC20("Gaussian Protocol", "RNG"), Ownable {
                 // decrease old representative
                 uint32 srcRepNum = numCheckpoints[srcRep];
                 uint256 srcRepOld = srcRepNum > 0 ? checkpoints[srcRep][srcRepNum - 1].votes : 0;
-                uint256 srcRepNew = srcRepOld.sub(amount);
+                uint256 srcRepNew = srcRepOld - amount;
                 _writeCheckpoint(srcRep, srcRepNum, srcRepOld, srcRepNew);
             }
 
@@ -206,7 +209,7 @@ contract SushiToken is ERC20("Gaussian Protocol", "RNG"), Ownable {
                 // increase new representative
                 uint32 dstRepNum = numCheckpoints[dstRep];
                 uint256 dstRepOld = dstRepNum > 0 ? checkpoints[dstRep][dstRepNum - 1].votes : 0;
-                uint256 dstRepNew = dstRepOld.add(amount);
+                uint256 dstRepNew = dstRepOld + amount;
                 _writeCheckpoint(dstRep, dstRepNum, dstRepOld, dstRepNew);
             }
         }
@@ -237,7 +240,7 @@ contract SushiToken is ERC20("Gaussian Protocol", "RNG"), Ownable {
         return uint32(n);
     }
 
-    function getChainId() internal pure returns (uint) {
+    function getChainId() internal view returns (uint) {
         uint256 chainId;
         assembly { chainId := chainid() }
         return chainId;
