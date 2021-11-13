@@ -3,8 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "build": "truffle compile"
+  },
+  "engines": {
+    "node": "10"
+  },
   "dependencies": {
-    "@openzeppelin/contracts": "^3.1.0",
+    "@openzeppelin/contracts": "^4.3.3",
     "@openzeppelin/test-helpers": "^0.5.6",
     "@solidstate/contracts": "^0.0.27",
     "babel-polyfill": "6.26.0",

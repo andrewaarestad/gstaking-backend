@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // pragma solidity 0.6.12;
 pragma solidity >=0.6.0 <0.9.0;
 
@@ -10,7 +11,7 @@ contract MockERC20 is ERC20 {
         string memory name,
         string memory symbol,
         uint256 supply
-    ) public ERC20(name, symbol) {
+    ) ERC20(name, symbol) {
         _mint(msg.sender, supply);
     }
 }

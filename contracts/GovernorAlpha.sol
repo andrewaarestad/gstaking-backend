@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: BSD-3-Clause
+
 // COPIED FROM https://github.com/compound-finance/compound-protocol/blob/master/contracts/Governance/GovernorAlpha.sol
 // Copyright 2020 Compound Labs, Inc.
 // Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -10,9 +12,9 @@
 // uint96s are changed to uint256s for simplicity and safety.
 
 // todo: 10/23/21
-// - Fix compilation errors in GovernerAlpha 
+// - Fix compilation errors in GovernerAlpha
 // - Deploy ERC721 Farms
-// - Connect ABIs, Addresses, and Frontend 
+// - Connect ABIs, Addresses, and Frontend
 // - Last Known Hurdle: Approval on ERC721Farms.sol from the frontend pools.
 // --- Token Approvals not working, must be incorrect ABI and contracts deployed.
 
@@ -59,58 +61,58 @@ contract GovernorAlpha {
     uint public proposalCount;
 
     struct Proposal {
-        /// @dev Unique id for looking up a proposal
+        // Unique id for looking up a proposal
         uint id;
 
-        /// @dev Creator of the proposal
+        // Creator of the proposal
         address proposer;
 
-        /// @dev The timestamp that the proposal will be available for execution, set once the vote succeeds
+        // The timestamp that the proposal will be available for execution, set once the vote succeeds
         uint eta;
 
-        /// @dev the ordered list of target addresses for calls to be made
+        // the ordered list of target addresses for calls to be made
         address[] targets;
 
-        /// @dev The ordered list of values (i.e. msg.value) to be passed to the calls to be made
+        // The ordered list of values (i.e. msg.value) to be passed to the calls to be made
         uint[] values;
 
-        /// @dev The ordered list of function signatures to be called
+        // The ordered list of function signatures to be called
         string[] signatures;
 
-        /// @dev The ordered list of calldata to be passed to each call
+        // The ordered list of calldata to be passed to each call
         bytes[] calldatas;
 
-        /// @dev The block at which voting begins: holders must delegate their votes prior to this block
+        // The block at which voting begins: holders must delegate their votes prior to this block
         uint startBlock;
 
-        /// @dev The block at which voting ends: votes must be cast prior to this block
+        // The block at which voting ends: votes must be cast prior to this block
         uint endBlock;
 
-        /// @dev Current number of votes in favor of this proposal
+        // Current number of votes in favor of this proposal
         uint forVotes;
 
-        /// @dev Current number of votes in opposition to this proposal
+        // Current number of votes in opposition to this proposal
         uint againstVotes;
 
-        /// @dev Flag marking whether the proposal has been canceled
+        // Flag marking whether the proposal has been canceled
         bool canceled;
 
-        /// @dev Flag marking whether the proposal has been executed
+        // Flag marking whether the proposal has been executed
         bool executed;
 
-        /// @dev Receipts of ballots for the entire set of voters
+        // Receipts of ballots for the entire set of voters
         mapping (address => Receipt) receipts;
     }
 
     /// @dev Ballot receipt record for a voter
     struct Receipt {
-        /// @dev Whether or not a vote has been cast
+        // Whether or not a vote has been cast
         bool hasVoted;
 
-        /// @dev Whether or not the voter supports the proposal
+        // Whether or not the voter supports the proposal
         bool support;
 
-        /// @dev The number of votes the voter had, which were cast
+        // The number of votes the voter had, which were cast
         uint256 votes;
     }
 
@@ -153,11 +155,14 @@ contract GovernorAlpha {
     /// @dev An event emitted when a proposal has been executed in the Timelock
     event ProposalExecuted(uint id);
 
-    constructor(address timelock_, address sushi_, address guardian_) public {
+    constructor(address timelock_, address sushi_, address guardian_) {
         timelock = TimelockInterface(timelock_);
         sushi = SushiToken(sushi_);
         guardian = guardian_;
     }
+
+
+    uint numProposals;
 
     function propose(address[] memory targets, uint[] memory values, string[] memory signatures, bytes[] memory calldatas, string memory description) public returns (uint) {
         require(sushi.getPriorVotes(msg.sender, sub256(block.number, 1)) > proposalThreshold(), "GovernorAlpha::propose: proposer votes below proposal threshold");
@@ -176,23 +181,23 @@ contract GovernorAlpha {
         uint endBlock = add256(startBlock, votingPeriod());
 
         proposalCount++;
-        Proposal memory newProposal = Proposal({
-            id: proposalCount,
-            proposer: msg.sender,
-            eta: 0,
-            targets: targets,
-            values: values,
-            signatures: signatures,
-            calldatas: calldatas,
-            startBlock: startBlock,
-            endBlock: endBlock,
-            forVotes: 0,
-            againstVotes: 0,
-            canceled: false,
-            executed: false
-        });
+        Proposal storage newProposal = proposals[numProposals++];
+        newProposal.id = proposalCount;
+        newProposal.proposer = msg.sender;
+        newProposal.eta = 0;
+        newProposal.targets = targets;
+        newProposal.values = values;
+        newProposal.signatures = signatures;
+        newProposal.calldatas = calldatas;
+        newProposal.startBlock = startBlock;
+        newProposal.endBlock = endBlock;
+        newProposal.forVotes = 0;
+        newProposal.againstVotes = 0;
+        newProposal.canceled = false;
+        newProposal.executed = false;
 
-        proposals[newProposal.id] = newProposal;
+        // XXX: Not sure this is the right way to update the proposal storage/construction
+//        proposals[newProposal.id] = newProposal;
         latestProposalIds[newProposal.proposer] = newProposal.id;
 
         emit ProposalCreated(newProposal.id, msg.sender, targets, values, signatures, calldatas, startBlock, endBlock, description);
@@ -220,14 +225,14 @@ contract GovernorAlpha {
         Proposal storage proposal = proposals[proposalId];
         proposal.executed = true;
         for (uint i = 0; i < proposal.targets.length; i++) {
-            timelock.executeTransaction.value(proposal.values[i])(proposal.targets[i], proposal.values[i], proposal.signatures[i], proposal.calldatas[i], proposal.eta);
+            timelock.executeTransaction{value:proposal.values[i]}(proposal.targets[i], proposal.values[i], proposal.signatures[i], proposal.calldatas[i], proposal.eta);
         }
         emit ProposalExecuted(proposalId);
     }
 
     function cancel(uint proposalId) public {
-        ProposalState state = state(proposalId);
-        require(state != ProposalState.Executed, "GovernorAlpha::cancel: cannot cancel executed proposal");
+        ProposalState proposalState = state(proposalId);
+        require(proposalState != ProposalState.Executed, "GovernorAlpha::cancel: cannot cancel executed proposal");
 
         Proposal storage proposal = proposals[proposalId];
         require(msg.sender == guardian || sushi.getPriorVotes(proposal.proposer, sub256(block.number, 1)) < proposalThreshold(), "GovernorAlpha::cancel: proposer above threshold");
@@ -335,7 +340,7 @@ contract GovernorAlpha {
         return a - b;
     }
 
-    function getChainId() internal pure returns (uint) {
+    function getChainId() internal view returns (uint) {
         uint chainId;
         assembly { chainId := chainid() }
         return chainId;
