@@ -76,13 +76,13 @@ contract GausFarm is IERC721Receiver {
 
     function claimRewards(uint256[] calldata tokenIds) public {
         uint256 reward;
-        uint256 block = Math.min(block.number, EXPIRATION);
+        uint256 blockNumber = Math.min(block.number, EXPIRATION);
 
         uint256[] memory rewards = calculateRewards(msg.sender, tokenIds);
 
         for (uint256 i; i < tokenIds.length; i++) {
             reward += rewards[i];
-            depositBlocks[msg.sender][tokenIds[i]] = block;
+            depositBlocks[msg.sender][tokenIds[i]] = blockNumber;
         }
 
         if (reward > 0) {
