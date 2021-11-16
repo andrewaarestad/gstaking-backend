@@ -16,10 +16,10 @@ describe('MasterChef Functionality', () => {
 
   it('should deploy the farms', async() => {
     const rng = await TestCommon.deployRng();
-    // TODO: Replace erc721Address with deployed erc721 contract address, we are using rng.address for now which is invalid
-    await TestCommon.deployGausFarm(rng.address, rng.address);
-    await TestCommon.deployLootFarm(rng.address, rng.address);
-    await TestCommon.deployNFarm(rng.address, rng.address);
+    const mockErc721 = await TestCommon.deployMockErc721();
+    await TestCommon.deployGausFarm(rng.address, mockErc721.address);
+    await TestCommon.deployLootFarm(rng.address, mockErc721.address);
+    await TestCommon.deployNFarm(rng.address, mockErc721.address);
   })
 
 

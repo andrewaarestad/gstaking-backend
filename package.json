@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "truffle compile"
+    "build": "hh compile",
+    "test": "hh test"
   },
   "engines": {
     "node": "12"

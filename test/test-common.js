@@ -10,6 +10,13 @@ class TestCommon {
     return contract;
   }
 
+  static async deployMockErc721() {
+    const contractFactory = await ethers.getContractFactory("MockERC721");
+    const contract = await contractFactory.deploy("Mock ERC721","mNFT");
+    await contract.deployed();
+    return contract;
+  }
+
   static async deployMasterChef(rngContractAddress, devAddress) {
     const contractFactory = await ethers.getContractFactory("MasterChef");
     const contract = await contractFactory.deploy(rngContractAddress, devAddress, BigNumber.from(1), BigNumber.from(1), BigNumber.from(1));
