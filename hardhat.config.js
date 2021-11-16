@@ -26,11 +26,11 @@ module.exports = {
   networks: {
     hardhat: {
       chainId: 1,
-      forking: {
-        enabled: true,
-        url: process.env.ALCHEMY_URL,
-        blockNumber: 12943483
-      }
+      // forking: {
+      //   enabled: true,
+      //   url: process.env.ALCHEMY_URL,
+      //   blockNumber: 12943483
+      // }
     }
   },
   etherscan: {
