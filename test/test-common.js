@@ -12,7 +12,7 @@ class TestCommon {
 
   static async deployMockErc721() {
     const contractFactory = await ethers.getContractFactory("MockERC721");
-    const contract = await contractFactory.deploy("Mock ERC721","mNFT");
+    const contract = await contractFactory.deploy("Mock ERC721", "mNFT", 10000);
     await contract.deployed();
     return contract;
   }

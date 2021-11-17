@@ -8,6 +8,7 @@ import '@solidstate/contracts/token/ERC721/IERC721Receiver.sol';
 import '@solidstate/contracts/utils/EnumerableSet.sol';
 
 import './token/IGauss.sol';
+import "hardhat/console.sol";
 
 contract GausFarm is IERC721Receiver {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -94,6 +95,7 @@ contract GausFarm is IERC721Receiver {
         claimRewards(tokenIds);
 
         for (uint256 i; i < tokenIds.length; i++) {
+//            console.log('transferring %s from %s to %s', tokenIds[i], msg.sender, address(this));
             IERC721(ERC721_CONTRACT).safeTransferFrom(
                 msg.sender,
                 address(this),
