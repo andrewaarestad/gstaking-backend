@@ -25,7 +25,7 @@ module.exports = {
   },
   networks: {
     hardhat: {
-      chainId: 1,
+      chainId: 1337,
       // forking: {
       //   enabled: true,
       //   url: process.env.ALCHEMY_URL,
